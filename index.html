@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <title>TKP Kvíz - Bajnokság</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --primary: #06b6d4;
+      --primary-hover: #0891b2;
+      --accent: #f59e0b;
+      --success: #10b981;
+      --danger: #f43f5e;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .vector-bg {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 1; opacity: 0.08; pointer-events: none;
+      background-image: radial-gradient(var(--primary) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    .vector-circle {
+      position: absolute;
+      border: 2px solid var(--primary);
+      border-radius: 50%; pointer-events: none; z-index: 1; opacity: 0.15;
+    }
+    .circle-1 { width: 400px; height: 400px; top: -100px; right: -100px; }
+    .circle-2 { width: 300px; height: 300px; bottom: -50px; left: -100px; }
+
+    .container {
+      position: relative; z-index: 2; width: 100%; max-width: 650px;
+      background: var(--bg-card); border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px; padding: 30px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .header { text-align: center; margin-bottom: 20px; }
+    .header h1 {
+      font-size: 2.2rem; font-weight: 800; letter-spacing: 2px;
+      background: linear-gradient(to right, var(--primary), #3b82f6);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 5px;
+    }
+    .header p { color: var(--text-muted); font-size: 0.9rem; }
+
+    /* Felső státuszsáv játék közben */
+    .game-status-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px; padding: 10px 15px; margin-bottom: 15px;
+      font-size: 0.9rem;
+    }
+    .lives-container { display: flex; gap: 4px; color: var(--danger); font-size: 1.2rem; }
+    .score-container { font-weight: 800; color: var(--accent); }
+    .combo-badge {
+      background: linear-gradient(135deg, var(--accent), #ea580c);
+      color: #fff; padding: 2px 8px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
+      display: none; animation: pulse-combo 0.6s infinite alternate;
+    }
+    @keyframes pulse-combo { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+
+    /* Időzítő neon csík */
+    .timer-container {
+      width: 100%; height: 5px; background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px; margin-bottom: 20px; overflow: hidden;
+    }
+    .timer-bar {
+      height: 100%; width: 100%; background: var(--primary);
+      box-shadow: 0 0 10px var(--primary); transition: width 0.1s linear, background-color 0.3s;
+    }
+
+    /* Beállítások / Kezdőlap */
+    .setup-screen { display: flex; flex-direction: column; gap: 24px; }
+    .setup-title { font-size: 1.1rem; text-align: center; font-weight: 600; }
+    
+    .range-container {
+      width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px;
+      background: rgba(255, 255, 255, 0.03); padding: 20px; border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .range-val { font-size: 2.5rem; font-weight: 800; color: var(--primary); }
+    input[type=range] { width: 100%; accent-color: var(--primary); cursor: pointer; }
+
+    .leaderboard-section {
+      background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px; padding: 15px;
+    }
+    .leaderboard-title {
+      font-size: 1rem; font-weight: 600; color: var(--primary);
+      margin-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 6px;
+    }
+    .leaderboard-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .leaderboard-table th { text-align: left; color: var(--text-muted); padding: 6px 4px; }
+    .leaderboard-table td { padding: 6px 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.03); }
+
+    .btn {
+      width: 100%; padding: 15px 30px; font-size: 1.1rem; font-weight: 600; color: #fff;
+      background: linear-gradient(135deg, var(--primary), #2563eb);
+      border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(6, 182, 212, 0.5); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Kvíz felület */
+    .quiz-screen { display: none; }
+    .question-card {
+      background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px; padding: 20px; margin-bottom: 20px;
+      min-height: 120px; display: flex; flex-direction: column; justify-content: center;
+    }
+    .question-category { font-size: 0.8rem; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .question-text { font-size: 1.15rem; font-weight: 600; line-height: 1.5; }
+
+    .options-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; }
+    .option {
+      background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px; padding: 16px 20px; font-size: 1.05rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease;
+    }
+    .option:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.2); }
+
+    .option.locked {
+      background: rgba(245, 158, 11, 0.15) !important; border-color: var(--accent) !important;
+      animation: pulse-orange 0.8s infinite alternate; pointer-events: none;
+    }
+    @keyframes pulse-orange { 0% { box-shadow: 0 0 5px var(--accent); } 100% { box-shadow: 0 0 15px var(--accent); } }
+
+    .option.correct-blink { animation: blink-green 0.4s infinite alternate; pointer-events: none; }
+    @keyframes blink-green {
+      0% { background: rgba(16, 185, 129, 0.1); border-color: var(--success); box-shadow: 0 0 5px var(--success); }
+      100% { background: rgba(16, 185, 129, 0.8); border-color: var(--success); box-shadow: 0 0 20px var(--success); color: #fff; }
+    }
+
+    .option.incorrect-shake {
+      background: var(--danger) !important; border-color: var(--danger) !important;
+      color: #fff !important; box-shadow: 0 0 15px rgba(244, 63, 94, 0.4);
+      animation: shake 0.3s ease-in-out; pointer-events: none;
+    }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+
+    .option.disabled { pointer-events: none; opacity: 0.6; }
+    .next-btn-container { display: none; }
+
+    /* Eredmények, mentés és részletes értékelés */
+    .result-screen { display: none; }
+    .result-rank-title { font-size: 1.1rem; color: var(--accent); text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 5px; text-align: center; }
+    .result-score { font-size: 3.2rem; font-weight: 800; color: var(--primary); margin: 5px 0 15px; text-align: center; line-height: 1; }
+    .result-message { font-size: 1.05rem; color: var(--text-muted); margin-bottom: 25px; text-align: center; }
+    
+    .save-score-box {
+      background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px; padding: 15px; margin-bottom: 25px; text-align: center;
+    }
+    .save-score-box input {
+      width: calc(100% - 130px); padding: 12px; border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.2); color: #fff; border-radius: 8px; margin-right: 10px;
+    }
+    .save-score-box button {
+      width: 110px; padding: 12px; border: none; background: var(--primary);
+      color: #fff; border-radius: 8px; cursor: pointer; font-weight: 600;
+    }
+
+    .evaluation-section { margin-top: 30px; text-align: left; }
+    .evaluation-title {
+      font-size: 1.2rem; font-weight: 600; color: var(--primary);
+      margin-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 8px;
+    }
+    .evaluation-list { display: flex; flex-direction: column; gap: 12px; max-height: 350px; overflow-y: auto; padding-right: 5px; }
+    .evaluation-item {
+      background: rgba(255, 255, 255, 0.02); border-left: 4px solid var(--primary);
+      padding: 12px 15px; border-radius: 0 8px 8px 0; font-size: 0.9rem;
+    }
+    .evaluation-item.correct { border-left-color: var(--success); }
+    .evaluation-item.incorrect { border-left-color: var(--danger); }
+    .evaluation-item.timeout { border-left-color: var(--accent); }
+    
+    .eval-q { font-weight: 600; margin-bottom: 4px; }
+    .eval-a { font-size: 0.85rem; color: var(--text-muted); }
+    .eval-a span { font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <div class="vector-bg"></div>
+  <div class="vector-circle circle-1"></div>
+  <div class="vector-circle circle-2"></div>
+
+  <div class="container">
+    <div class="header">
+      <h1>TKP-quiz</h1>
+      <p>Mellékek és hívószámok tudásfelmérője</p>
+    </div>
+
+    <!-- 1. Beállítások képernyő -->
+    <div id="setupScreen" class="setup-screen">
+      <p class="setup-title">Állítsa be a kérdések számát az Időfutam indításához:</p>
+      <div class="range-container">
+        <span id="rangeValue" class="range-val">25</span>
+        <input type="range" id="questionCount" min="10" max="50" value="25">
+      </div>
+      <button class="btn" id="startBtn" disabled>Betöltés...</button>
+
+      <!-- Globális ranglista -->
+      <div class="leaderboard-section">
+        <div class="leaderboard-title">🏆 Globális Dicsőségtábla (Top 5 - Pontszám alapján)</div>
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Hely.</th>
+              <th>Név</th>
+              <th>Pontszám</th>
+              <th>Találat</th>
+              <th>Dátum</th>
+            </tr>
+          </thead>
+          <tbody id="globalLeaderboardBody">
+            <tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Töltés...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Saját korábbi eredmények -->
+      <div class="leaderboard-section">
+        <div class="leaderboard-title">🕒 Saját Legjobb Pontszámaid (Helyi)</div>
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Dátum</th>
+              <th>Helyes / Összes</th>
+              <th>Pontszám</th>
+            </tr>
+          </thead>
+          <tbody id="localLeaderboardBody">
+            <tr><td colspan="3" style="text-align:center; color: var(--text-muted);">Még nem játszottál ezen a böngészőn.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 2. Kvíz játék felülete -->
+    <div id="quizScreen" class="quiz-screen">
+      <div class="game-status-bar">
+        <div class="lives-container" id="livesContainer">❤️ ❤️ ❤️</div>
+        <div>
+          <span class="combo-badge" id="comboBadge">1x Szorzó</span>
+          <span id="questionNum" style="color: var(--text-muted); margin-left: 8px;">1/10</span>
+        </div>
+        <div class="score-container" id="scoreNum">0 PONT</div>
+      </div>
+      
+      <!-- Időzítő neon csík -->
+      <div class="timer-container">
+        <div id="timerBar" class="timer-bar"></div>
+      </div>
+
+      <div class="question-card">
+        <div id="questionCategory" class="question-category">Betöltés...</div>
+        <div id="questionText" class="question-text">Betöltés...</div>
+      </div>
+      <div id="optionsList" class="options-list"></div>
+      <div id="nextBtnContainer" class="next-btn-container">
+        <button class="btn" id="nextBtn">Következő Kérdés</button>
+      </div>
+    </div>
+
+    <!-- 3. Eredményjelző és Kiértékelés -->
+    <div id="resultScreen" class="result-screen">
+      <div class="result-rank-title" id="resultRank">Rang: ÚJONC TELEFONÁLÓ</div>
+      <div id="resultScore" class="result-score">0</div>
+      <p id="resultMessage" class="result-message">Sajnos elfogytak az életeid. Ne add fel, gyakorolj tovább!</p>
+      
+      <!-- Pontszám mentése a szerverre -->
+      <div class="save-score-box" id="saveScoreBox">
+        <p style="margin-bottom: 10px; font-size: 0.9rem;">Mentsd el a pontszámod a globális dicsőségtáblára!</p>
+        <input type="text" id="playerNameInput" placeholder="Neved..." maxlength="15">
+        <button id="saveScoreBtn">Mentés</button>
+      </div>
+
+      <button class="btn" id="restartBtn" style="margin-bottom: 25px;">Kvíz Újraindítása</button>
+
+      <!-- Részletes Kiértékelés -->
+      <div class="evaluation-section">
+        <div class="evaluation-title">📊 Részletes Kiértékelés és Tanulás</div>
+        <div class="evaluation-list" id="evaluationList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // AZ ÖN APPS SCRIPT WEBALKALMAZÁS URL-JE:
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxxuBUwfupxal-1HSWV7YZQwQW2n7shFPSv-4E74b2trszIV7wwBnckJmel1xEibk81DQ/exec";
+
+    var database = [];
+    var globalLeaderboard = [];
+
+    var quizQuestions = [];
+    var currentQuestionIdx = 0;
+    
+    // Versenyhelyzet paraméterei
+    var scorePoints = 0;
+    var correctAnswersCount = 0;
+    var lives = 3;
+    var streak = 0;
+    var timeLeft = 15.0; // 15 másodperc kérdésenként
+    var timerInterval = null;
+    
+    var totalQuestionsCount = 10;
+    var isAnsweringBlocked = false;
+    var answeredLog = [];
+
+    // DOM Elemek
+    const setupScreen = document.getElementById('setupScreen');
+    const quizScreen = document.getElementById('quizScreen');
+    const resultScreen = document.getElementById('resultScreen');
+    
+    const questionCountInput = document.getElementById('questionCount');
+    const rangeValue = document.getElementById('rangeValue');
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const nextBtnContainer = document.getElementById('nextBtnContainer');
+    
+    const livesContainer = document.getElementById('livesContainer');
+    const comboBadge = document.getElementById('comboBadge');
+    const questionNumText = document.getElementById('questionNum');
+    const scoreNumText = document.getElementById('scoreNum');
+    const timerBar = document.getElementById('timerBar');
+    
+    const questionCategory = document.getElementById('questionCategory');
+    const questionText = document.getElementById('questionText');
+    const optionsList = document.getElementById('optionsList');
+    
+    const resultRank = document.getElementById('resultRank');
+    const resultScore = document.getElementById('resultScore');
+    const resultMessage = document.getElementById('resultMessage');
+    const saveScoreBox = document.getElementById('saveScoreBox');
+    const playerNameInput = document.getElementById('playerNameInput');
+    const saveScoreBtn = document.getElementById('saveScoreBtn');
+    const evaluationList = document.getElementById('evaluationList');
+    
+    const globalLeaderboardBody = document.getElementById('globalLeaderboardBody');
+    const localLeaderboardBody = document.getElementById('localLeaderboardBody');
+
+    // Kezdeti szinkronizáció
+    window.addEventListener('load', function() {
+      setupScreen.style.display = 'flex';
+      loadExternalData();
+    });
+
+    // Adatok dinamikus letöltése a Google Sheet backendből
+    function loadExternalData() {
+      startBtn.disabled = true;
+      startBtn.textContent = "Adatok betöltése...";
+      
+      // 1. Kvíz adatbázis lekérdezése
+      fetch(GAS_WEB_APP_URL + "?action=getDb")
+        .then(function(res) { return res.json(); })
+        .then(function(dbData) {
+          database = dbData;
+          // 2. Globális dicsőségtábla lekérdezése
+          return fetch(GAS_WEB_APP_URL + "?action=getLeaderboard");
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(lbData) {
+          globalLeaderboard = lbData;
+          updateLeaderboards();
+          
+          startBtn.disabled = false;
+          startBtn.textContent = "Bajnokság Indítása";
+        })
+        .catch(function(err) {
+          console.error("Hiba az adatok letöltésekor:", err);
+          globalLeaderboardBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--danger);">Hiba történt a szerver kapcsolatban.</td></tr>';
+          startBtn.textContent = "Szerver hiba. Próbálja újra!";
+        });
+    }
+
+    function updateLeaderboards() {
+      if (globalLeaderboard && globalLeaderboard.length > 0) {
+        globalLeaderboardBody.innerHTML = '';
+        globalLeaderboard.slice(0, 5).forEach(function(item, index) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = '<td>' + (index + 1) + '.</td>' +
+                         '<td><strong>' + escapeHtml(item.name) + '</strong></td>' +
+                         '<td>' + item.points.toLocaleString() + ' PONT</td>' +
+                         '<td>' + item.score + '/' + item.total + '</td>' +
+                         '<td>' + item.date + '</td>';
+          globalLeaderboardBody.appendChild(tr);
+        });
+      } else {
+        globalLeaderboardBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Még nincsenek mentett adatok.</td></tr>';
+      }
+
+      const localScores = JSON.parse(localStorage.getItem('tkp_local_scores_points')) || [];
+      if (localScores.length > 0) {
+        localLeaderboardBody.innerHTML = '';
+        localScores.slice(0, 5).forEach(function(item) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = '<td>' + item.date + '</td>' +
+                         '<td>' + item.score + ' / ' + item.total + '</td>' +
+                         '<td style="color: var(--accent); font-weight:600;">' + item.points.toLocaleString() + ' pont</td>';
+          localLeaderboardBody.appendChild(tr);
+        });
+      }
+    }
+
+    // Időzítő kezelése
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 15.0;
+      updateTimerUI();
+      
+      timerInterval = setInterval(function() {
+        timeLeft -= 0.1;
+        if (timeLeft <= 0) {
+          timeLeft = 0;
+          clearInterval(timerInterval);
+          handleTimeout();
+        } else {
+          updateTimerUI();
+        }
+      }, 100);
+    }
+
+    function updateTimerUI() {
+      var pct = (timeLeft / 15.0) * 100;
+      timerBar.style.width = pct + '%';
+      if (timeLeft <= 4) {
+        timerBar.style.backgroundColor = 'var(--danger)';
+        timerBar.style.boxShadow = '0 0 10px var(--danger)';
+      } else {
+        timerBar.style.backgroundColor = 'var(--primary)';
+        timerBar.style.boxShadow = '0 0 10px var(--primary)';
+      }
+    }
+
+    // Időtúllépés kezelése
+    function handleTimeout() {
+      if (isAnsweringBlocked) return;
+      isAnsweringBlocked = true;
+
+      lives--;
+      streak = 0;
+      updateLivesUI();
+      updateComboUI();
+
+      const currentQuestion = quizQuestions[currentQuestionIdx];
+      
+      answeredLog.push({
+        name: currentQuestion.name,
+        category: currentQuestion.reszleg && currentQuestion.reszleg !== "-" ? currentQuestion.reszleg : currentQuestion.almenu,
+        chosen: "Lejárt az idő",
+        correct: currentQuestion.number,
+        isCorrect: false,
+        timeout: true
+      });
+
+      // Felvillantjuk a helyes választ piros hiba után
+      Array.from(optionsList.children).forEach(function(child) {
+        child.classList.add('disabled');
+        if (child.textContent === currentQuestion.number) {
+          child.classList.add('correct-blink');
+        }
+      });
+
+      setTimeout(function() {
+        if (lives <= 0) {
+          showResults();
+        } else {
+          nextQuestionOrResult();
+        }
+      }, 2000);
+    }
+
+    function updateLivesUI() {
+      var heartStr = '';
+      for (var i = 0; i < 3; i++) {
+        heartStr += (i < lives) ? '❤️ ' : '🖤 ';
+      }
+      livesContainer.textContent = heartStr;
+    }
+
+    function updateComboUI() {
+      if (streak >= 2) {
+        comboBadge.style.display = 'inline-block';
+        comboBadge.textContent = streak + 'x Szorzó';
+      } else {
+        comboBadge.style.display = 'none';
+      }
+    }
+
+    // Véletlenszerű torzítás alternatívák létrehozásához
+    function mutateNumber(num) {
+      if (!num) return "";
+      let chars = num.split('');
+      let mutations = 0;
+      let attempts = 0;
+      while (mutations < Math.min(2, chars.length) && attempts < 10) {
+        attempts++;
+        let idx = Math.floor(Math.random() * chars.length);
+        if (/\d/.test(chars[idx])) {
+          let original = chars[idx];
+          let next;
+          do { next = Math.floor(Math.random() * 10).toString(); } while (next === original);
+          chars[idx] = next;
+          mutations++;
+        }
+      }
+      return chars.join('');
+    }
+
+    // Választásgenerátor
+    function generateChoices(correctItem, allRecords) {
+      const distractors = new Set();
+      const correctNum = correctItem.number;
+
+      if (correctItem.reszleg && correctItem.reszleg !== "-") {
+        const sameDept = allRecords.filter(function(item) {
+          return item.reszleg === correctItem.reszleg && item.number !== correctNum;
+        });
+        sameDept.sort(function() { return 0.5 - Math.random(); });
+        sameDept.forEach(function(item) { if (distractors.size < 2) distractors.add(item.number); });
+      }
+
+      if (distractors.size < 2) {
+        const sameAlmenu = allRecords.filter(function(item) {
+          return item.almenu === correctItem.almenu && 
+                 item.number !== correctNum &&
+                 item.number.length === correctNum.length &&
+                 !distractors.has(item.number);
+        });
+        sameAlmenu.sort(function() { return 0.5 - Math.random(); });
+        sameAlmenu.forEach(function(item) { if (distractors.size < 2) distractors.add(item.number); });
+      }
+
+      if (distractors.size < 2) {
+        const sameLength = allRecords.filter(function(item) {
+          return item.number !== correctNum && 
+                 item.number.length === correctNum.length &&
+                 !distractors.has(item.number);
+        });
+        sameLength.sort(function() { return 0.5 - Math.random(); });
+        sameLength.forEach(function(item) { if (distractors.size < 2) distractors.add(item.number); });
+      }
+
+      let safetyCounter = 0;
+      while (distractors.size < 2 && safetyCounter < 50) {
+        safetyCounter++;
+        const mutated = mutateNumber(correctNum);
+        if (mutated && mutated !== correctNum) {
+          distractors.add(mutated);
+        }
+      }
+
+      const choices = Array.from(distractors);
+      choices.push(correctNum);
+      
+      for (let i = choices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = choices[i];
+        choices[i] = choices[j];
+        choices[j] = temp;
+      }
+
+      return choices;
+    }
+
+    questionCountInput.addEventListener('input', function(e) {
+      rangeValue.textContent = e.target.value;
+    });
+
+    startBtn.addEventListener('click', function() {
+      totalQuestionsCount = parseInt(questionCountInput.value, 10);
+      startQuiz();
+    });
+
+    restartBtn.addEventListener('click', function() {
+      resultScreen.style.display = 'none';
+      setupScreen.style.display = 'flex';
+      loadExternalData();
+    });
+
+    function startQuiz() {
+      const shuffledDb = [...database].sort(function() { return 0.5 - Math.random(); });
+      quizQuestions = shuffledDb.slice(0, totalQuestionsCount);
+      
+      currentQuestionIdx = 0;
+      scorePoints = 0;
+      correctAnswersCount = 0;
+      lives = 3;
+      streak = 0;
+      isAnsweringBlocked = false;
+      answeredLog = [];
+
+      updateLivesUI();
+      updateComboUI();
+
+      setupScreen.style.display = 'none';
+      quizScreen.style.display = 'block';
+      
+      showQuestion();
+    }
+
+    function showQuestion() {
+      isAnsweringBlocked = false;
+      nextBtnContainer.style.display = 'none';
+      optionsList.innerHTML = '';
+
+      const currentQuestion = quizQuestions[currentQuestionIdx];
+      
+      questionNumText.textContent = (currentQuestionIdx + 1) + '/' + totalQuestionsCount;
+      scoreNumText.textContent = scorePoints.toLocaleString() + ' PONT';
+
+      let catText = currentQuestion.almenu;
+      if (currentQuestion.reszleg && currentQuestion.reszleg !== "-") {
+        catText += ' • ' + currentQuestion.reszleg;
+      }
+      questionCategory.textContent = catText;
+      questionText.textContent = 'Mi a melléke vagy közvetlen telefonszáma az alábbi egységnek?\n"' + currentQuestion.name + '"';
+
+      const choices = generateChoices(currentQuestion, database);
+
+      choices.forEach(function(choice) {
+        const optDiv = document.createElement('div');
+        optDiv.className = 'option';
+        optDiv.textContent = choice;
+        optDiv.addEventListener('click', function() {
+          selectOption(optDiv, choice, currentQuestion);
+        });
+        optionsList.appendChild(optDiv);
+      });
+
+      startTimer();
+    }
+
+    function selectOption(selectedElement, chosenVal, currentQuestion) {
+      if (isAnsweringBlocked) return;
+      isAnsweringBlocked = true;
+      clearInterval(timerInterval);
+
+      const correctVal = currentQuestion.number;
+      selectedElement.classList.add('locked');
+
+      Array.from(optionsList.children).forEach(function(child) {
+        if (child !== selectedElement) {
+          child.classList.add('disabled');
+        }
+      });
+
+      // 1.5 másodperces feszültség generálás
+      setTimeout(function() {
+        selectedElement.classList.remove('locked');
+        const isCorrect = (chosenVal === correctVal);
+        
+        if (isCorrect) {
+          correctAnswersCount++;
+          streak++;
+          
+          // Pontszám kiszámítása: Alappont (500) + Sebesség bónusz (max 750) megszorozva a kombóval
+          var basePoints = 500;
+          var speedBonus = Math.round(timeLeft * 50); // Minél több idő maradt, annál több pont
+          var comboMultiplier = 1 + (streak > 1 ? (streak * 0.2) : 0); // Minden sorozati elem után +20% bónusz
+          
+          var earnedPoints = Math.round((basePoints + speedBonus) * comboMultiplier);
+          scorePoints += earnedPoints;
+          
+          scoreNumText.textContent = scorePoints.toLocaleString() + ' PONT';
+          selectedElement.classList.add('correct-blink');
+        } else {
+          lives--;
+          streak = 0;
+          updateLivesUI();
+          selectedElement.classList.add('incorrect-shake');
+          Array.from(optionsList.children).forEach(function(child) {
+            if (child.textContent === correctVal) {
+              child.classList.remove('disabled');
+              child.classList.add('correct-blink');
+            }
+          });
+        }
+
+        updateComboUI();
+
+        // Naplózás a végelszámoláshoz
+        answeredLog.push({
+          name: currentQuestion.name,
+          category: currentQuestion.reszleg && currentQuestion.reszleg !== "-" ? currentQuestion.reszleg : currentQuestion.almenu,
+          chosen: chosenVal,
+          correct: correctVal,
+          isCorrect: isCorrect,
+          timeout: false
+        });
+
+        setTimeout(function() {
+          if (lives <= 0) {
+            showResults();
+          } else {
+            nextQuestionOrResult();
+          }
+        }, 1200);
+
+      }, 1500);
+    }
+
+    function nextQuestionOrResult() {
+      currentQuestionIdx++;
+      if (currentQuestionIdx < totalQuestionsCount) {
+        showQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    // Játék vége
+    function showResults() {
+      clearInterval(timerInterval);
+      quizScreen.style.display = 'none';
+      resultScreen.style.display = 'block';
+      saveScoreBox.style.display = 'block';
+      playerNameInput.value = '';
+
+      resultScore.textContent = scorePoints.toLocaleString() + ' pont';
+      
+      // Rang kiszámítása
+      var rank = 'ÚJONC TELEFONÁLÓ';
+      if (scorePoints > 15000) {
+        rank = 'LEGENDA TELEFONKÖZPONTOS 👑';
+      } else if (scorePoints > 8000) {
+        rank = 'MELLÉK-MESTER 🎖️';
+      } else if (scorePoints > 3000) {
+        rank = 'IRODAI DISZPÉCSER 📞';
+      }
+      resultRank.textContent = 'Rang: ' + rank;
+
+      // Üzenet testreszabása
+      if (lives <= 0) {
+        resultMessage.textContent = 'A játék véget ért, mert elfogytak az életeid. Próbáld újra, hogy javítsd a pontszámod!';
+      } else {
+        resultMessage.textContent = 'Sikeresen végigjátszottad az időfutamot! Neveddel megörökítheted a pontszámodat az utókornak.';
+      }
+
+      saveScoreLocally(scorePoints, correctAnswersCount, totalQuestionsCount);
+      generateEvaluationReport();
+    }
+
+    function generateEvaluationReport() {
+      evaluationList.innerHTML = '';
+      answeredLog.forEach(function(item) {
+        const div = document.createElement('div');
+        var statusClass = 'incorrect';
+        if (item.isCorrect) statusClass = 'correct';
+        if (item.timeout) statusClass = 'timeout';
+        
+        div.className = 'evaluation-item ' + statusClass;
+        
+        var innerHTML = '<div class="eval-q">' + escapeHtml(item.name) + ' <span style="font-weight:normal; font-size: 0.8rem; color:var(--text-muted);">(' + escapeHtml(item.category) + ')</span></div>' +
+                        '<div class="eval-a">';
+        
+        if (item.timeout) {
+          innerHTML += 'Eredmény: <span style="color: var(--accent); font-weight:600;">Lejárt az idő!</span> | Helyes válasz: <span style="color: var(--success)">' + escapeHtml(item.correct) + '</span>';
+        } else {
+          innerHTML += 'Te válaszod: <span style="color: ' + (item.isCorrect ? 'var(--success)' : 'var(--danger)') + '">' + escapeHtml(item.chosen) + '</span>';
+          if (!item.isCorrect) {
+            innerHTML += ' | Helyes válasz: <span style="color: var(--success)">' + escapeHtml(item.correct) + '</span>';
+          }
+        }
+        
+        innerHTML += '</div>';
+        div.innerHTML = innerHTML;
+        evaluationList.appendChild(div);
+      });
+    }
+
+    function saveScoreLocally(points, correct, total) {
+      const scoreObj = {
+        points: points,
+        score: correct,
+        total: total,
+        date: new Date().toLocaleDateString('hu-HU')
+      };
+      
+      let localScores = JSON.parse(localStorage.getItem('tkp_local_scores_points')) || [];
+      localScores.push(scoreObj);
+      
+      localScores.sort(function(a, b) {
+        return b.points - a.points;
+      });
+      
+      localScores = localScores.slice(0, 5);
+      localStorage.setItem('tkp_local_scores_points', JSON.stringify(localScores));
+    }
+
+    // Pontszám mentése a Google Sheet adatbázisba POST metódussal
+    saveScoreBtn.addEventListener('click', function() {
+      const name = playerNameInput.value.trim();
+      if (!name) {
+        alert('Kérjük, adjon meg egy nevet a mentéshez!');
+        return;
+      }
+      
+      saveScoreBtn.disabled = true;
+      saveScoreBtn.textContent = 'Mentés...';
+
+      fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain" // Ezzel elkerülhetőek a nehézkes CORS preflight hibák
+        },
+        body: JSON.stringify({
+          name: name,
+          points: scorePoints,
+          score: correctAnswersCount,
+          total: totalQuestionsCount
+        })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(updatedLeaderboard) {
+        globalLeaderboard = updatedLeaderboard;
+        saveScoreBox.style.display = 'none';
+        alert('Pontszámod elmentve! Nézd meg a helyezésed a ranglistán!');
+        updateLeaderboards();
+      })
+      .catch(function(err) {
+        console.error("Hiba a mentésnél:", err);
+        alert('Szerverhiba történt a mentéskor. Kérjük próbálja meg később.');
+        saveScoreBtn.disabled = false;
+        saveScoreBtn.textContent = 'Mentés';
+      });
+    });
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
