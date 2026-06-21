@@ -10,7 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
-        body { font-family: 'Poppins', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        body { font-family: 'Poppins', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; overflow-x: hidden; }
         .bg-switchboard { background: radial-gradient(circle at top, #1e1b4b 0%, #0f172a 50%, #020617 100%); background-attachment: fixed; }
         .glass { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75), inset 0 1px 1px rgba(255, 255, 255, 0.1); }
         .wheel-circle { background: conic-gradient(#ef4444 0deg 45deg, #f97316 45deg 90deg, #06b6d4 90deg 135deg, #eab308 135deg 180deg, #8b5cf6 180deg 225deg, #ec4899 225deg 270deg, #10b981 270deg 315deg, #3b82f6 315deg 360deg); box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.5); }
@@ -46,29 +46,41 @@
         @media (min-width: 640px) { .duel-score-big { font-size: 3.5rem; } }
         .duel-score-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7; }
         .profile-card-rank-badge { position: absolute; top: -8px; left: -8px; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; border: 3px solid rgba(255,255,255,0.2); box-shadow: 0 0 20px rgba(0,0,0,0.4); }
+        .mini-game-btn { transition: all 0.2s; }
+        .mini-game-btn:hover { transform: scale(1.02); box-shadow: 0 4px 15px rgba(99,102,241,0.3); }
+        /* Mobil optimalizáció */
+        .main-container { width: 100%; max-width: 100%; padding: 0.5rem; }
+        @media (min-width: 640px) { .main-container { max-width: 640px; padding: 1rem; } }
+        @media (min-width: 768px) { .main-container { max-width: 768px; padding: 1.5rem; } }
+        @media (min-width: 1024px) { .main-container { max-width: 1024px; padding: 2rem; } }
+        /* Szívek sor */
+        .lives-wrapper { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+        .lives-wrapper i { font-size: 1.25rem; }
+        @media (min-width: 640px) { .lives-wrapper i { font-size: 1.5rem; } }
     </style>
 </head>
-<body class="min-h-screen text-slate-100 bg-switchboard flex flex-col items-center justify-between p-4 sm:p-6 md:p-8 relative overflow-x-hidden">
+<body class="min-h-screen text-slate-100 bg-switchboard flex flex-col items-center justify-between p-2 sm:p-4 md:p-6 relative overflow-x-hidden">
 
-    <main class="w-full max-w-lg sm:max-w-xl md:max-w-2xl 2xl:max-w-3xl flex-grow flex flex-col justify-center my-2 z-10 relative">
+    <main class="w-full max-w-lg sm:max-w-xl md:max-w-2xl 2xl:max-w-3xl flex-grow flex flex-col justify-center my-2 z-10 main-container">
         
-        <div id="loginScreen" class="glass rounded-3xl p-6 sm:p-8 shadow-2xl text-center relative transition-all duration-500">
+        <!-- ==================== BEJELENTKEZÉS ==================== -->
+        <div id="loginScreen" class="glass rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl text-center relative transition-all duration-500">
             <button onclick="toggleMute()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 text-xl transition-colors duration-300 drop-shadow-md">
                 <i class="fa-solid fa-volume-high" id="muteIcon"></i>
             </button>
 
-            <div class="text-6xl sm:text-7xl mb-4 text-indigo-400 logo-fixed drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]"><i class="fa-solid fa-headset"></i></div>
-            <h2 class="text-2xl sm:text-3xl font-extrabold mb-1 text-white tracking-tight">Mellék Kvízjáték</h2>
+            <div class="text-5xl sm:text-7xl mb-4 text-indigo-400 logo-fixed drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]"><i class="fa-solid fa-headset"></i></div>
+            <h2 class="text-xl sm:text-3xl font-extrabold mb-1 text-white tracking-tight">Mellék Kvízjáték</h2>
 
-            <div id="dailyGiftBanner" class="mb-5 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 p-4 rounded-2xl text-left flex items-center justify-between animate-pulse cursor-pointer hover:from-amber-500/30 hover:to-orange-500/30 transition-all shadow-[0_0_20px_rgba(245,158,11,0.2)]" onclick="openDailyRewardModal()">
-                <div class="flex items-center gap-4">
-                    <span class="text-4xl drop-shadow-lg">🎁</span>
+            <div id="dailyGiftBanner" class="mb-5 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 p-3 sm:p-4 rounded-2xl text-left flex items-center justify-between animate-pulse cursor-pointer hover:from-amber-500/30 hover:to-orange-500/30 transition-all shadow-[0_0_20px_rgba(245,158,11,0.2)]" onclick="openDailyRewardModal()">
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <span class="text-3xl sm:text-4xl drop-shadow-lg">🎁</span>
                     <div>
-                        <h4 class="text-sm sm:text-base font-bold text-white uppercase tracking-wider leading-none">Napi Bónusz</h4>
-                        <p class="text-xs sm:text-sm text-amber-200/80 mt-1 leading-none font-semibold">Vedd át a napi bónuszod!</p>
+                        <h4 class="text-xs sm:text-base font-bold text-white uppercase tracking-wider leading-none">Napi Bónusz</h4>
+                        <p class="text-[10px] sm:text-sm text-amber-200/80 mt-1 leading-none font-semibold">Vedd át a napi bónuszod!</p>
                     </div>
                 </div>
-                <i class="fa-solid fa-chevron-right text-xl text-amber-400"></i>
+                <i class="fa-solid fa-chevron-right text-lg sm:text-xl text-amber-400"></i>
             </div>
 
             <div id="duelPointsNotice" class="hidden mb-4 p-3 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs sm:text-sm rounded-xl font-bold text-center animate-pulse shadow-inner">
@@ -78,17 +90,17 @@
             <!-- Név mező + Profil link -->
             <div class="mb-3 flex items-center gap-2">
                 <input type="text" id="usernameInput" placeholder="Add meg a neved" class="flex-1 bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-3 sm:py-4 text-white text-center font-bold text-sm sm:text-base placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-inner">
-                <button onclick="openMyProfile()" class="bg-indigo-600/80 hover:bg-indigo-500 text-white font-bold px-4 py-3 sm:py-4 rounded-xl border border-indigo-400/30 transition-all shadow-lg text-sm whitespace-nowrap" title="Profilom megtekintése">
+                <button onclick="openMyProfile()" class="bg-indigo-600/80 hover:bg-indigo-500 text-white font-bold px-3 sm:px-4 py-3 sm:py-4 rounded-xl border border-indigo-400/30 transition-all shadow-lg text-xs sm:text-sm whitespace-nowrap">
                     <i class="fa-solid fa-id-card mr-1"></i> Profil
                 </button>
             </div>
 
-            <!-- Utoljára belépve lista (közvetlenül a név alatt) -->
+            <!-- Utoljára belépve lista -->
             <div class="mb-5 text-left">
                 <h3 class="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2 ml-1">
                     <i class="fa-solid fa-clock text-cyan-400"></i> Utoljára belépve
                 </h3>
-                <div class="bg-slate-900/80 rounded-xl p-3 sm:p-4 border border-slate-700/80 shadow-inner max-h-48 overflow-y-auto" id="lastLoginListContainer">
+                <div class="bg-slate-900/80 rounded-xl p-2 sm:p-3 border border-slate-700/80 shadow-inner max-h-48 overflow-y-auto" id="lastLoginListContainer">
                     <p class="text-xs sm:text-sm text-slate-500 font-semibold text-center">Betöltés...</p>
                 </div>
             </div>
@@ -226,7 +238,7 @@
             </div>
         </div>
 
-        <!-- Reklám Modál -->
+        <!-- ==================== REKLÁM MODÁL ==================== -->
         <div id="adModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-all duration-300">
             <div class="glass p-6 sm:p-8 rounded-3xl max-w-md w-full text-center border border-amber-500/40 shadow-[0_0_50px_rgba(245,158,11,0.2)] ad-modal-content">
                 <div class="text-6xl sm:text-7xl mb-4 text-amber-400 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] ad-placeholder">
@@ -257,28 +269,30 @@
             </div>
         </div>
 
-        <div id="gameScreen" class="hidden glass rounded-3xl p-5 sm:p-8 shadow-2xl flex flex-col relative overflow-hidden transition-all duration-500">
+        <!-- ==================== JÁTÉK KÉPERNYŐ ==================== -->
+        <div id="gameScreen" class="hidden glass rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl flex flex-col relative overflow-hidden transition-all duration-500">
             <button onclick="toggleMute()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 text-xl transition-colors duration-300 drop-shadow-md z-20">
                 <i class="fa-solid fa-volume-high animate-pulse" id="muteIconGame"></i>
             </button>
             
             <div class="absolute top-0 left-0 h-1.5 sm:h-2 bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-600 transition-all duration-100 ease-linear shadow-[0_0_15px_rgba(99,102,241,0.8)] z-20" id="timerBar" style="width: 100%;"></div>
 
-            <!-- Párbaj pontkövető - nagyban -->
-            <div id="duelScoreBoard" class="hidden bg-slate-900/80 border border-amber-500/30 rounded-2xl p-4 mb-4 shadow-[0_0_30px_rgba(245,158,11,0.1)]">
+            <!-- Párbaj pontkövető -->
+            <div id="duelScoreBoard" class="hidden bg-slate-900/80 border border-amber-500/30 rounded-2xl p-3 sm:p-4 mb-4 shadow-[0_0_30px_rgba(245,158,11,0.1)]">
                 <div class="flex justify-between items-center text-center">
                     <div class="flex-1">
-                        <div class="duel-score-label text-amber-400">Te</div>
+                        <div class="duel-score-label text-amber-400"><span id="myDuelName">Te</span></div>
                         <div class="duel-score-big text-emerald-400" id="myDuelScore">0</div>
                     </div>
                     <div class="text-3xl font-black text-slate-500 px-4">⚔️</div>
                     <div class="flex-1">
-                        <div class="duel-score-label text-amber-400">Ellenfél</div>
+                        <div class="duel-score-label text-amber-400"><span id="opponentDuelName">Ellenfél</span></div>
                         <div class="duel-score-big text-rose-400" id="opponentDuelScore">0</div>
                     </div>
                 </div>
                 <div id="opponentFinishedBadge" class="hidden mt-2 text-center text-xs font-bold text-emerald-400 bg-emerald-500/20 border border-emerald-500/30 rounded-lg py-1 px-2">
                     <i class="fa-solid fa-check-circle mr-1"></i> Ellenfél befejezte! Pontja: <span id="opponentFinalScoreDisplay">0</span>
+                    <span id="neededScoreDisplay" class="block text-amber-300 mt-1"></span>
                 </div>
             </div>
 
@@ -322,7 +336,7 @@
             <div class="flex justify-between items-end mb-5">
                 <div class="flex flex-col gap-2">
                     <div class="flex items-center gap-1.5">
-                        <div id="livesContainer" class="flex gap-1 text-base sm:text-lg drop-shadow-md"></div>
+                        <div id="livesContainer" class="lives-wrapper"></div>
                         <span id="shieldIndicator" class="hidden ml-2 text-cyan-400 text-base sm:text-lg drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]" title="Védőpajzs aktív (csak erre a körre)"><i class="fa-solid fa-shield-halved animate-pulse"></i></span>
                     </div>
 
@@ -376,6 +390,7 @@
             </div>
         </div>
 
+        <!-- ==================== SZERENCSERKÉK (SZÉRIA) ==================== -->
         <div id="wheelModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-all duration-300 opacity-100">
             <div class="glass p-6 sm:p-8 rounded-3xl max-w-sm sm:max-w-md w-full text-center border border-indigo-500/50 shadow-[0_0_50px_rgba(99,102,241,0.3)] transform scale-100">
                 <h3 class="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-200 flex items-center justify-center gap-2 drop-shadow-lg mb-2"><i class="fa-solid fa-clover text-amber-400"></i> SZERENCSE-PÖRGETÉS!</h3>
@@ -393,6 +408,7 @@
             </div>
         </div>
 
+        <!-- ==================== ÉLET VÁSÁRLÁS MODÁL ==================== -->
         <div id="lifeBuyModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-all duration-300">
             <div class="glass p-6 sm:p-8 rounded-3xl max-w-sm sm:max-w-md w-full text-center border border-rose-500/50 shadow-[0_0_50px_rgba(244,63,94,0.3)]">
                 <h3 class="text-xl sm:text-2xl font-black text-rose-400 flex items-center justify-center gap-2 drop-shadow-lg mb-2"><i class="fa-solid fa-heart-pulse animate-pulse"></i> ELFOGYOTT AZ ÉLETED!</h3>
@@ -420,6 +436,7 @@
             </div>
         </div>
 
+        <!-- ==================== SZERENCSERKÉK (TÉTTEL) ==================== -->
         <div id="luckyWheelPromptModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-all duration-300">
             <div class="glass p-6 sm:p-8 rounded-3xl max-w-sm sm:max-w-md w-full text-center border border-amber-500/50 shadow-[0_0_50px_rgba(245,158,11,0.3)]">
                 <div class="text-5xl sm:text-6xl text-amber-400 mb-4 animate-bounce drop-shadow-[0_0_15px_rgba(245,158,11,0.6)]"><i class="fa-solid fa-clover"></i></div>
@@ -443,7 +460,7 @@
                 </div>
 
                 <div class="flex flex-col gap-3">
-                    <button onclick="startLuckyWheelGame()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black py-3 sm:py-4 px-4 rounded-xl uppercase tracking-widest text-sm sm:text-base shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all transform hover:-translate-y-1">
+                    <button id="startWheelBtn" onclick="startLuckyWheelGame()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black py-3 sm:py-4 px-4 rounded-xl uppercase tracking-widest text-sm sm:text-base shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all transform hover:-translate-y-1">
                         Tét rakása & Pörgetés 🎡
                     </button>
                     <button onclick="skipLuckyWheelGame()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-xl uppercase tracking-widest text-xs sm:text-sm border border-slate-600 transition-all">
@@ -453,12 +470,13 @@
             </div>
         </div>
 
+        <!-- ==================== INTERAKTÍV KERÉK MODÁL ==================== -->
         <div id="interactiveWheelModal" class="hidden fixed inset-0 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 z-50 transition-all duration-300">
             <div class="glass p-6 sm:p-8 rounded-3xl max-w-sm sm:max-w-md w-full text-center border border-indigo-500/40 shadow-[0_0_50px_rgba(99,102,241,0.2)]">
                 <h3 class="text-lg sm:text-xl font-black text-amber-400 flex items-center justify-center gap-2 tracking-widest mb-1 drop-shadow-md"><i class="fa-solid fa-circle-notch animate-spin"></i> SZERENCSEKERÉK</h3>
                 <p class="text-xs sm:text-sm text-slate-300 font-semibold bg-slate-900/60 inline-block px-3 py-1 rounded-full border border-slate-700/50 mb-4">Téted: <span id="activeWheelBet" class="text-amber-400 font-black">0 p</span></p>
 
-                <div class="relative w-64 h-64 sm:w-72 sm:h-72 mx-auto my-6 flex items-center justify-center drop-shadow-2xl">
+                <div class="relative w-56 h-56 sm:w-72 sm:h-72 mx-auto my-6 flex items-center justify-center drop-shadow-2xl">
                     <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-t-[28px] border-t-amber-400 z-20 filter drop-shadow-md"></div>
                     <div id="luckyWheelCircle" class="w-full h-full rounded-full border-8 border-slate-800 shadow-2xl wheel-circle relative overflow-hidden" style="transform: rotate(0deg);">
                         <div class="absolute inset-0 pointer-events-none">
@@ -485,6 +503,7 @@
             </div>
         </div>
 
+        <!-- ==================== HAVI MODÁL ==================== -->
         <div id="monthlyModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-all duration-300">
             <div class="glass p-6 sm:p-8 rounded-3xl max-w-sm sm:max-w-md w-full text-center border border-amber-500/40 shadow-[0_0_50px_rgba(245,158,11,0.2)]">
                 <div class="text-6xl sm:text-7xl mb-4 text-amber-400 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]" id="monthlyModalIcon"><i class="fa-solid fa-trophy"></i></div>
@@ -508,6 +527,7 @@
             </div>
         </div>
 
+        <!-- ==================== PÁRBAJ ÉRTESÍTÉS ==================== -->
         <div id="duelNotificationModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-all duration-300">
             <div class="glass p-6 sm:p-8 rounded-3xl max-w-sm sm:max-w-md w-full text-center border border-rose-500/50 shadow-[0_0_50px_rgba(244,63,94,0.3)]">
                 <div class="text-6xl sm:text-7xl text-rose-500 mb-4 animate-bounce drop-shadow-[0_0_15px_rgba(244,63,94,0.6)]"><i class="fa-solid fa-swords"></i></div>
@@ -525,6 +545,7 @@
             </div>
         </div>
 
+        <!-- ==================== PÁRBAJ EREDMÉNY ==================== -->
         <div id="duelResultModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-all duration-300">
             <div class="glass p-6 sm:p-8 rounded-3xl max-w-sm sm:max-w-md w-full text-center border border-amber-500/50 shadow-[0_0_50px_rgba(245,158,11,0.3)]">
                 <div class="text-6xl sm:text-7xl text-amber-400 mb-4 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]" id="duelResultIcon"><i class="fa-solid fa-trophy"></i></div>
@@ -536,6 +557,7 @@
             </div>
         </div>
 
+        <!-- ==================== TÉT MODÁL (DUPLÁZÁS) ==================== -->
         <div id="wagerModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-all duration-300">
             <div class="glass p-6 sm:p-8 rounded-3xl max-w-sm sm:max-w-md w-full text-center border border-cyan-500/40 shadow-[0_0_50px_rgba(34,211,238,0.2)]">
                 <div class="text-6xl sm:text-7xl text-cyan-400 mb-4 animate-pulse drop-shadow-[0_0_15px_rgba(34,211,238,0.6)]"><i class="fa-solid fa-dice animate-spin-slow"></i></div>
@@ -553,10 +575,10 @@
             </div>
         </div>
 
-        <!-- Profil Kártya Modál (bővebb, logóval, rangjelzéssel) -->
+        <!-- ==================== PROFIL MODÁL ==================== -->
         <div id="userProfileModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-all duration-300">
             <div class="glass p-6 sm:p-8 rounded-3xl max-w-sm sm:max-w-md w-full text-center border border-indigo-500/40 shadow-[0_0_50px_rgba(99,102,241,0.2)] relative overflow-hidden">
-                <!-- Logó pecsét a bal felsőben -->
+                <!-- Logó pecsét -->
                 <div class="profile-card-rank-badge" id="profileRankBadge" style="background: rgba(99,102,241,0.3); border-color: rgba(99,102,241,0.5);">
                     <i class="fa-solid fa-headset text-white text-xl drop-shadow-lg"></i>
                 </div>
@@ -607,8 +629,9 @@
             </div>
         </div>
 
+        <!-- ==================== MINI-JÁTÉKOK MODÁL ==================== -->
         <div id="miniGamesModal" class="hidden fixed inset-0 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 z-50 transition-all duration-300">
-            <div class="glass p-6 sm:p-8 rounded-3xl max-w-md sm:max-w-lg md:max-w-xl w-full text-center border border-amber-500/30 shadow-[0_0_50px_rgba(245,158,11,0.2)] overflow-y-auto max-h-[90vh]">
+            <div class="glass p-4 sm:p-6 md:p-8 rounded-3xl max-w-md sm:max-w-lg md:max-w-xl w-full text-center border border-amber-500/30 shadow-[0_0_50px_rgba(245,158,11,0.2)] overflow-y-auto max-h-[90vh]">
                 <h3 class="text-xl sm:text-2xl font-black text-amber-400 flex items-center justify-center gap-3 tracking-tight mb-2 drop-shadow-md"><i class="fa-solid fa-gamepad animate-pulse text-2xl"></i> MINI-JÁTÉKOK TERME</h3>
                 <p class="text-sm sm:text-base text-slate-300 font-medium mb-6">Válassz egy játékot, gyűjts extra pontokat! <br><span class="text-xs text-slate-400 bg-slate-900/60 px-3 py-1 rounded-full border border-slate-800 mt-2 inline-block">Maradék kör-limit: <span id="miniGameLimitDisplay" class="font-black text-amber-400 text-sm">3</span>/3</span></p>
                 
@@ -693,6 +716,7 @@
             </div>
         </div>
 
+        <!-- ==================== BOLT MEGERŐSÍTÉS ==================== -->
         <div id="shopConfirmModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-all duration-300">
             <div class="glass p-6 sm:p-8 rounded-3xl max-w-sm sm:max-w-md w-full text-center border border-emerald-500/40 shadow-[0_0_50px_rgba(16,185,129,0.2)]">
                 <div class="text-5xl sm:text-6xl text-emerald-400 mb-4 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]"><i class="fa-solid fa-cart-shopping"></i></div>
@@ -710,8 +734,9 @@
             </div>
         </div>
 
+        <!-- ==================== NAPI BÓNUSZ MODÁL ==================== -->
         <div id="dailyRewardModal" class="hidden fixed inset-0 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 z-50 transition-all duration-300">
-            <div class="glass p-6 sm:p-8 rounded-3xl max-w-md sm:max-w-lg md:max-w-xl w-full text-center border border-amber-500/40 shadow-[0_0_50px_rgba(245,158,11,0.2)] overflow-y-auto max-h-[90vh]">
+            <div class="glass p-4 sm:p-6 md:p-8 rounded-3xl max-w-md sm:max-w-lg md:max-w-xl w-full text-center border border-amber-500/40 shadow-[0_0_50px_rgba(245,158,11,0.2)] overflow-y-auto max-h-[90vh]">
                 <div class="text-6xl sm:text-7xl text-amber-400 mb-4 animate-bounce drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]"><i class="fa-solid fa-gift"></i></div>
                 <h3 class="text-xl sm:text-2xl font-black text-white tracking-tight">Heti Napi Bónusz Kalendárium 🎁</h3>
                 <p class="text-sm sm:text-base text-slate-300 mt-2 mb-6 font-medium">Lépj be minden nap egymás után a folyamatosan növekvő jutalmakért!</p>
@@ -731,6 +756,7 @@
             </div>
         </div>
 
+        <!-- ==================== JÁTÉK VÉGE KÉPERNYŐ ==================== -->
         <div id="gameOverScreen" class="hidden glass rounded-3xl p-6 sm:p-8 shadow-2xl text-center relative overflow-hidden transition-all duration-500">
             <div class="text-6xl sm:text-7xl mb-4 text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]" id="endIcon"><i class="fa-solid fa-heart-crack"></i></div>
             <h2 class="text-2xl sm:text-3xl font-black mb-2 text-white tracking-tight" id="endTitle">Vége a játéknak!</h2>
@@ -765,7 +791,7 @@
             </button>
         </div>
 
-        <!-- Párbaj várakozó modál - BEZÁRÁS gombbal -->
+        <!-- ==================== PÁRBAJ VÁRAKOZÓ MODÁL ==================== -->
         <div id="waitingModal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-all duration-300">
             <div class="glass p-6 sm:p-8 rounded-3xl max-w-sm sm:max-w-md w-full text-center border border-amber-500/40 shadow-[0_0_50px_rgba(245,158,11,0.2)] relative">
                 <button onclick="closeWaitingModalAndGoHome()" class="absolute top-3 right-4 text-slate-400 hover:text-rose-400 text-xl transition-colors duration-200 font-bold" title="Bezárás és visszatérés a főmenübe">
@@ -1461,7 +1487,7 @@
         let currentUsername = "";
         let score = 0;
         let lives = 3;
-        const maxLives = 5;
+        const maxLives = 20; // csak korlátként, a megjelenítésben nem használjuk
         let streak = 0;
         let maxStreakRecord = 0;
         let currentQuestionNumber = 0;
@@ -1534,7 +1560,7 @@
         let unlimitedTimeActive = false;
         let unlimitedTimeExpiry = null;
 
-        // ===== REKLÁM RENDSZER (felhasználónként tárolva) =====
+        // ===== REKLÁM RENDSZER =====
         const MAX_DAILY_ADS = 5;
 
         const segments = [
@@ -1612,7 +1638,7 @@
             return elements[id];
         }
 
-        // ========== RANGOK ÉS SZÍNEK (20 árnyalat) ==========
+        // ========== RANGOK ÉS SZÍNEK ==========
         const rankColors = [
             { min: 0, max: 49, name: "Kezdő", color: "#64748b", bg: "rgba(100,116,139,0.3)", border: "#64748b" },
             { min: 50, max: 99, name: "Tanuló", color: "#94a3b8", bg: "rgba(148,163,184,0.3)", border: "#94a3b8" },
@@ -1690,7 +1716,7 @@
             return isCurrentQuestionRisk && riskChosen === null;
         }
 
-        // ========== ONLINE ÁLLAPOT ELLENŐRZÉS ==========
+        // ========== ONLINE ÁLLAPOT ==========
         function isUserOnline(lastLoginDate) {
             if (!lastLoginDate) return false;
             try {
@@ -1701,7 +1727,6 @@
                 return false;
             }
         }
-
         function formatLastLogin(lastLoginDate) {
             if (!lastLoginDate) return "Ismeretlen";
             try {
@@ -2093,7 +2118,7 @@
             } catch(e) {}
         }
 
-        // ========== PÁRBAJ EREDMÉNY ELLENŐRZÉS BELÉPÉSKOR ==========
+        // ========== PÁRBAJ EREDMÉNY ELLENŐRZÉS ==========
         async function checkForPendingDuelResults(username) {
             if (!db || !isFirebaseInitialized) return;
             try {
@@ -2149,7 +2174,7 @@
             }
         }
 
-        // ========== SEGÍTSÉGEK (24 ÓRÁS BÉRLETTEL KIBŐVÍTVE) ==========
+        // ========== SEGÍTSÉGEK (24 ÓRÁS BÉRLETTEL) ==========
         function use5050() {
             if (lives <= 0) return;
             checkUnlimitedPasses();
@@ -2338,7 +2363,7 @@
             }
         }
 
-        // ========== TARTÓS PAJZSOK KEZELÉSE ==========
+        // ========== TARTÓS PAJZSOK ==========
         function updatePermanentShieldDisplay() {
             const display = getEl('permanentShieldDisplay');
             const count = getEl('permanentShieldCount');
@@ -2352,7 +2377,7 @@
             }
         }
 
-        // ========== TARTÓS SEGÍTSÉGEK MEGJELENÍTÉSE ==========
+        // ========== TARTÓS SEGÍTSÉGEK ==========
         function updatePermanentHelpersDisplay() {
             document.getElementById('perm5050Count').innerText = persistent5050;
             document.getElementById('permSkipCount').innerText = persistentSkip;
@@ -2413,7 +2438,7 @@
                     if (shieldInd) shieldInd.classList.remove('hidden');
                     alert(`Gratulálunk! Megnyerted: ${finalReward.text}. A következő hibánál megvéd!`);
                 } else if (finalReward.type === "life") {
-                    if (lives < maxLives) lives += finalReward.value;
+                    lives++;
                     alert(`Gratulálunk! Megnyerted: ${finalReward.text}`);
                 }
                 setTimeout(() => {
@@ -2494,7 +2519,7 @@
                         <p class="text-[10px] sm:text-xs text-slate-400 mt-1 leading-snug">${item.desc}</p>
                     </div>
                     <button onclick="promptBuyShopItem('${item.id}', ${item.cost}, '${item.name}')" class="mt-3 w-full bg-slate-800 hover:bg-indigo-600 text-white font-bold py-2 px-3 rounded-lg text-xs uppercase tracking-widest transition-all border border-slate-600 hover:border-indigo-500 shadow-sm">
-                        Megvesz (${item.cost}p)
+                        Vásárol (${item.cost}p)
                     </button>
                 `;
                 container.appendChild(el);
@@ -2605,17 +2630,15 @@
             }
         }
 
-        // ========== REKLÁM KEZELÉS (felhasználónként) ==========
+        // ========== REKLÁM KEZELÉS ==========
         function showAdModal() {
             const modal = document.getElementById('adModal');
             if (modal) modal.classList.remove('hidden');
         }
-
         function closeAdModal() {
             const modal = document.getElementById('adModal');
             if (modal) modal.classList.add('hidden');
         }
-
         function confirmAdWatch() {
             const today = getTodayString();
             let dailyCount = parseInt(getLocalVal('daily_ad_count', '0'));
@@ -2640,7 +2663,6 @@
             updateUI();
             updateAdDisplay();
         }
-
         function convertAdPoints() {
             let points = parseInt(getLocalVal('ad_points', '0'));
             if (points < 100) {
@@ -2667,7 +2689,6 @@
             updateAdDisplay();
             updateUI();
         }
-
         function updateAdDisplay() {
             const adInfo = document.getElementById('adInfoDisplay');
             if (adInfo) {
@@ -2753,7 +2774,7 @@
             }
         }
 
-        // ========== NAPI BÓNUSZ ==========
+        // ========== NAPI BÓNUSZ KALENDÁRIUM ==========
         const dailyBonusRewards = [
             { type: "points", value: 50, text: "50 Pont", icon: "💰" },
             { type: "points", value: 100, text: "100 Pont", icon: "💰" },
@@ -2769,6 +2790,7 @@
             { type: "life", value: 3, text: "3 Extra élet", icon: "💖" },
             { type: "points", value: 1000, text: "1000 Pont - SZUPER JACKPOT!", icon: "🔥" }
         ];
+
         function getWeeklyRewards() {
             let rewards = JSON.parse(getLocalVal('weekly_rewards', 'null'));
             if (!rewards) {
@@ -2917,16 +2939,14 @@
         }
 
         // ======================================================================
-        // ========== PÁRBAJ RENDSZER - TELJESEN ÚJRAÉPÍTVE ==========
+        // ========== PÁRBAJ RENDSZER ==========
         // ======================================================================
 
-        // Párbaj állapotváltozók
         let duelData = null;
         let duelListenerUnsubscribe = null;
         let duelTimeoutId = null;
         let duelWaitingModalShown = false;
 
-        // Párbaj indítása
         async function initiateDuelFlow(opponentName) {
             if (!db || !isFirebaseInitialized) {
                 alert("Párbaj mód csak online (Firebase) verzióban érhető el!");
@@ -3015,7 +3035,6 @@
             }
         }
 
-        // Párbaj elfogadása
         async function acceptDuel(duelDoc) {
             if (!db || !isFirebaseInitialized) return;
             try {
@@ -3046,7 +3065,6 @@
             }
         }
 
-        // Párbaj elutasítása
         async function declineDuel(duelDoc) {
             if (!db || !isFirebaseInitialized) return;
             try {
@@ -3058,7 +3076,6 @@
             }
         }
 
-        // Párbaj figyelő indítása
         function startDuelListener(docId) {
             if (duelListenerUnsubscribe) {
                 duelListenerUnsubscribe();
@@ -3071,7 +3088,6 @@
                 const data = doc.data();
                 duelData = data;
 
-                // Párbaj pontszámok frissítése a felületen
                 updateDuelScoreBoard(data);
 
                 if (data.challengerFinished && data.opponentFinished) {
@@ -3105,12 +3121,14 @@
                     const myFinished = isChallenger ? data.challengerFinished : data.opponentFinished;
                     const otherFinished = isChallenger ? data.opponentFinished : data.challengerFinished;
                     
-                    // Ha az ellenfél befejezte, mutassuk a pontjait
                     if (otherFinished) {
                         const opponentScore = isChallenger ? data.opponentScore : data.challengerScore;
                         document.getElementById('opponentDuelScore').innerText = opponentScore;
                         document.getElementById('opponentFinishedBadge').classList.remove('hidden');
                         document.getElementById('opponentFinalScoreDisplay').innerText = opponentScore;
+                        // Szükséges pont a győzelemhez
+                        const needed = opponentScore + 1;
+                        document.getElementById('neededScoreDisplay').innerHTML = `🎯 A győzelemhez <b>${needed}</b> pontot kell szerezned!`;
                     } else {
                         document.getElementById('opponentFinishedBadge').classList.add('hidden');
                     }
@@ -3128,7 +3146,6 @@
             });
         }
 
-        // Párbaj ponttábla frissítése
         function updateDuelScoreBoard(data) {
             const board = document.getElementById('duelScoreBoard');
             if (!board) return;
@@ -3138,18 +3155,21 @@
             const oppScore = isChallenger ? data.opponentScore : data.challengerScore;
             document.getElementById('myDuelScore').innerText = myScore;
             document.getElementById('opponentDuelScore').innerText = oppScore;
+            // Nevek
+            document.getElementById('myDuelName').innerText = isChallenger ? data.challenger : data.opponent;
+            document.getElementById('opponentDuelName').innerText = isChallenger ? data.opponent : data.challenger;
             
-            // Ha az ellenfél befejezte
             const otherFinished = isChallenger ? data.opponentFinished : data.challengerFinished;
             if (otherFinished) {
                 document.getElementById('opponentFinishedBadge').classList.remove('hidden');
                 document.getElementById('opponentFinalScoreDisplay').innerText = oppScore;
+                const needed = oppScore + 1;
+                document.getElementById('neededScoreDisplay').innerHTML = `🎯 A győzelemhez <b>${needed}</b> pontot kell szerezned!`;
             } else {
                 document.getElementById('opponentFinishedBadge').classList.add('hidden');
             }
         }
 
-        // Várakozó ablak megjelenítése
         function showWaitingForOpponent(docId) {
             let modal = document.getElementById('waitingModal');
             if (!modal) {
@@ -3210,23 +3230,17 @@
             }, 60000);
         }
 
-        // Várakozó ablak bezárása és főmenübe lépés
         function closeWaitingModalAndGoHome() {
             const modal = document.getElementById('waitingModal');
             if (modal) modal.classList.add('hidden');
             duelWaitingModalShown = false;
-            // Nem adjuk fel, csak elrejtjük és megyünk a főmenübe
-            // A listener tovább fut a háttérben
             if (isDuelMode && activeDuelDocId) {
-                // A játékos visszalép a főmenübe, de a párbaj a háttérben folytatódik
-                // A pontszámok frissülni fognak, ha vége lesz, értesítés jön
                 backToMainMenu();
             } else {
                 backToMainMenu();
             }
         }
 
-        // Párbaj adatok lekérése
         async function getDuelData(docId) {
             if (!db || !isFirebaseInitialized) return null;
             try {
@@ -3239,7 +3253,6 @@
             }
         }
 
-        // Párbaj eredmény megjelenítése
         async function showDuelResult(duelDoc, role) {
             const modal = getEl('duelResultModal');
             const title = getEl('duelResultTitle');
@@ -3352,7 +3365,6 @@
             backToMainMenu();
         }
 
-        // Párbaj státusz frissítése
         async function updateDuelStatus(docId, playerScore) {
             if (!db || !isFirebaseInitialized) return;
             try {
@@ -3395,7 +3407,6 @@
             }
         }
 
-        // Párbaj értesítés megjelenítése
         function showDuelNotification(duelDoc) {
             activeIncomingDuelDoc = duelDoc;
             const modal = getEl('duelNotificationModal');
@@ -3413,7 +3424,6 @@
         // ========== PROFIL FUNKCIÓK ==========
         // ======================================================================
 
-        // Saját profil megnyitása
         function openMyProfile() {
             const nameInput = getEl('usernameInput');
             const name = nameInput ? nameInput.value.trim() : "";
@@ -3425,7 +3435,6 @@
             openUserProfileModal(name);
         }
 
-        // Név kitöltése és profil nyitás
         function fillUsernameAndOpenProfile(username) {
             const nameInput = getEl('usernameInput');
             if (nameInput) {
@@ -3435,7 +3444,15 @@
             openUserProfileModal(username);
         }
 
-        // Profil kártya megnyitása (bővített)
+        // Csak név kitöltése (profil megnyitása nélkül)
+        function fillUsernameOnly(username) {
+            const nameInput = getEl('usernameInput');
+            if (nameInput) {
+                nameInput.value = username;
+                currentUsername = username;
+            }
+        }
+
         async function openUserProfileModal(username) {
             const modal = getEl('userProfileModal');
             const title = getEl('profileModalTitle');
@@ -3490,7 +3507,6 @@
                 }
             }
             
-            // Rang megjelenítés
             const rankInfo = getRankInfo(userScore);
             if (rankNameEl) rankNameEl.innerText = rankInfo.name;
             if (rankBadgeEl) {
@@ -3537,10 +3553,11 @@
         }
 
         // ======================================================================
-        // ========== MINI-JÁTÉKOK ==========
+        // ========== MINI-JÁTÉKOK TELJES IMPLEMENTÁCIÓ ==========
         // ======================================================================
         let currentMiniGameType = "";
         let miniGameData = {};
+
         function openMiniGames() {
             if (timer) clearInterval(timer);
             getEl('miniGamesModal').classList.remove('hidden');
@@ -3548,28 +3565,569 @@
             getEl('activeMiniGameArea').classList.add('hidden');
             getEl('miniGameLimitDisplay').innerText = (3 - playedMiniGamesCount);
         }
+
         function closeMiniGames() {
             getEl('miniGamesModal').classList.add('hidden');
         }
+
         function launchMiniGame(type) {
             if (playedMiniGamesCount >= 3) {
                 alert("Elérted a maximum 3 mini-játék limitet a fő játék előtt! Játssz egy normál kvízt a feloldáshoz!");
                 return;
             }
-            // ... (mini games implementation kept as is, not modified)
-            // For brevity, keeping the existing mini-game logic
-            // The full code would include all mini-games
-            // ...
+            playedMiniGamesCount++;
+            setLocalVal('minigames_played', playedMiniGamesCount);
+            getEl('miniGameLimitDisplay').innerText = (3 - playedMiniGamesCount);
+            getEl('miniGamesSelectionArea').classList.add('hidden');
+            const area = getEl('activeMiniGameArea');
+            area.classList.remove('hidden');
+            area.innerHTML = '';
+            currentMiniGameType = type;
+
+            switch(type) {
+                case 'highLow': startHighLow(area); break;
+                case 'typer': startTyper(area); break;
+                case 'memory': startMemory(area); break;
+                case 'cardFlip': startCardFlip(area); break;
+                case 'sorter': startSorter(area); break;
+                case 'deptGuess': startDeptGuess(area); break;
+                case 'math': startMath(area); break;
+                case 'scrambler': startScrambler(area); break;
+                case 'safeCracker': startSafeCracker(area); break;
+                case 'lotto': startLotto(area); break;
+                default: area.innerHTML = '<p class="text-red-400">Ismeretlen játék!</p>';
+            }
+        }
+
+        // ----- 1. Kisebb vagy Nagyobb? -----
+        function startHighLow(area) {
+            let current = directory[Math.floor(Math.random() * directory.length)];
+            let attempts = 0;
+            let points = 0;
+            const render = () => {
+                area.innerHTML = `
+                    <h4 class="text-xl font-black text-white mb-2">📈 Kisebb vagy Nagyobb?</h4>
+                    <p class="text-sm text-slate-300 mb-2">Aktuális mellék: <b class="text-indigo-400">${current.ext}</b></p>
+                    <p class="text-xs text-slate-400 mb-4">Tippeld meg, a következő mellék száma nagyobb-e!</p>
+                    <div class="flex gap-4 justify-center mb-4">
+                        <button onclick="highLowGuess('nagyobb')" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-xl shadow-lg transition-all transform hover:scale-105">Nagyobb</button>
+                        <button onclick="highLowGuess('kisebb')" class="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-6 rounded-xl shadow-lg transition-all transform hover:scale-105">Kisebb</button>
+                    </div>
+                    <p class="text-sm text-slate-400">Pontok: ${points} | Próbálkozások: ${attempts}</p>
+                    <button onclick="closeMiniGames()" class="mt-4 bg-slate-700 hover:bg-slate-600 text-white font-bold py-1 px-4 rounded-lg text-sm transition-all">Bezárás</button>
+                `;
+                window.highLowGuess = (choice) => {
+                    if (attempts >= 5) {
+                        alert("5 próbálkozás vége! Visszatérsz a főmenübe.");
+                        closeMiniGames();
+                        return;
+                    }
+                    const next = directory[Math.floor(Math.random() * directory.length)];
+                    const currentNum = parseInt(current.ext.replace(/,.*$/, '').trim());
+                    const nextNum = parseInt(next.ext.replace(/,.*$/, '').trim());
+                    let correct = (choice === 'nagyobb' && nextNum > currentNum) || (choice === 'kisebb' && nextNum < currentNum);
+                    if (correct) {
+                        points += 50;
+                        playSound('correct');
+                        alert(`Helyes! A következő mellék: ${next.ext} (${nextNum})`);
+                    } else {
+                        playSound('wrong');
+                        alert(`Hibás! A következő mellék: ${next.ext} (${nextNum})`);
+                    }
+                    attempts++;
+                    current = next;
+                    if (attempts >= 5) {
+                        const bonus = points > 0 ? 100 : 0;
+                        score += points + bonus;
+                        alert(`Mini-játék vége! Pontjaid: ${points} + bónusz ${bonus} = ${points+bonus} pont az összpontszámhoz!`);
+                        updateUI();
+                        closeMiniGames();
+                        return;
+                    }
+                    render();
+                };
+            };
+            render();
+        }
+
+        // ----- 2. Gyorsíró-Mellék -----
+        function startTyper(area) {
+            let target = directory[Math.floor(Math.random() * directory.length)];
+            let startTime = Date.now();
+            let done = false;
+            area.innerHTML = `
+                <h4 class="text-xl font-black text-white mb-2">⌨️ Gyorsíró-Mellék</h4>
+                <p class="text-sm text-slate-300 mb-2">Írd be a következő helyiség mellékét: <b class="text-indigo-400">${target.name}</b></p>
+                <input type="text" id="typerInput" class="bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2 w-full text-center text-lg font-bold" placeholder="Mellék...">
+                <button onclick="typerCheck()" class="mt-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-xl shadow-lg transition-all">Ellenőrzés</button>
+                <button onclick="closeMiniGames()" class="mt-3 ml-2 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-xl text-sm transition-all">Bezárás</button>
+                <p id="typerFeedback" class="mt-3 text-sm"></p>
+            `;
+            window.typerCheck = () => {
+                if (done) return;
+                const input = document.getElementById('typerInput');
+                const val = input.value.trim();
+                const targetExt = target.ext.replace(/,.*$/, '').trim();
+                const elapsed = (Date.now() - startTime) / 1000;
+                if (val === targetExt) {
+                    const bonus = Math.max(0, 100 - Math.floor(elapsed * 2));
+                    const points = 50 + bonus;
+                    score += points;
+                    alert(`Helyes! ${points} pont (${elapsed.toFixed(1)} mp)`);
+                    playSound('correct');
+                    done = true;
+                    closeMiniGames();
+                } else {
+                    document.getElementById('typerFeedback').innerHTML = `<span class="text-rose-400">Hibás! A helyes válasz: ${targetExt}</span>`;
+                    playSound('wrong');
+                    done = true;
+                    setTimeout(closeMiniGames, 1500);
+                }
+            };
+        }
+
+        // ----- 3. Mellék Párosító (Memória) -----
+        function startMemory(area) {
+            const pairs = [];
+            const shuffled = shuffleArray([...directory]);
+            for (let i = 0; i < 6; i++) {
+                pairs.push({ name: shuffled[i].name, ext: shuffled[i].ext, id: i });
+            }
+            const cards = shuffleArray([...pairs, ...pairs]);
+            let flipped = [];
+            let matched = [];
+            let lock = false;
+
+            const renderMemory = () => {
+                area.innerHTML = `
+                    <h4 class="text-xl font-black text-white mb-2">🧠 Mellék Párosító</h4>
+                    <p class="text-sm text-slate-300 mb-3">Találd meg az összetartozó helyiség-mellék párokat!</p>
+                    <div class="grid grid-cols-4 gap-2 mb-4">
+                        ${cards.map((card, idx) => {
+                            const isFlipped = flipped.includes(idx) || matched.includes(idx);
+                            const isMatched = matched.includes(idx);
+                            return `<button onclick="memoryFlip(${idx})" class="bg-slate-700 hover:bg-slate-600 p-2 rounded-lg text-sm font-bold transition-all ${isMatched ? 'opacity-50' : ''}" ${isMatched ? 'disabled' : ''}>
+                                ${isFlipped ? (card.ext + ' ' + card.name) : '❓'}
+                            </button>`;
+                        }).join('')}
+                    </div>
+                    <p class="text-sm text-slate-400">Találatok: ${matched.length/2} / 6</p>
+                    <button onclick="closeMiniGames()" class="mt-3 bg-slate-700 hover:bg-slate-600 text-white font-bold py-1 px-4 rounded-lg text-sm transition-all">Bezárás</button>
+                `;
+            };
+
+            window.memoryFlip = (idx) => {
+                if (lock || flipped.includes(idx) || matched.includes(idx)) return;
+                flipped.push(idx);
+                if (flipped.length === 2) {
+                    lock = true;
+                    const [i1, i2] = flipped;
+                    if (cards[i1].id === cards[i2].id && i1 !== i2) {
+                        matched.push(i1, i2);
+                        playSound('correct');
+                        if (matched.length === cards.length) {
+                            score += 200;
+                            alert('Gratulálok! Minden párt megtaláltál! +200 pont!');
+                            updateUI();
+                            closeMiniGames();
+                            return;
+                        }
+                    } else {
+                        playSound('wrong');
+                    }
+                    setTimeout(() => {
+                        flipped = [];
+                        lock = false;
+                        renderMemory();
+                    }, 500);
+                }
+                renderMemory();
+            };
+            renderMemory();
+        }
+
+        // ----- 4. Szerencse-Kártya -----
+        function startCardFlip(area) {
+            const cards = [
+                { icon: '💎', value: 100, type: 'points' },
+                { icon: '🛡️', value: 1, type: 'shield' },
+                { icon: '💖', value: 1, type: 'life' },
+                { icon: '💰', value: 50, type: 'points' },
+                { icon: '👑', value: 200, type: 'points' },
+                { icon: '💎', value: 300, type: 'points' },
+                { icon: '🛡️', value: 2, type: 'shield' },
+                { icon: '💖', value: 2, type: 'life' },
+                { icon: '🔥', value: 500, type: 'points' }
+            ];
+            const shuffled = shuffleArray(cards);
+            let selected = null;
+            area.innerHTML = `
+                <h4 class="text-xl font-black text-white mb-2">🃏 Szerencse-Kártya</h4>
+                <p class="text-sm text-slate-300 mb-3">Válassz egy kártyát, és nyerj jutalmat!</p>
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                    ${shuffled.map((card, idx) => `
+                        <button onclick="cardFlipPick(${idx})" class="bg-indigo-700 hover:bg-indigo-600 text-4xl p-4 rounded-xl shadow-lg transition-all transform hover:scale-105">❓</button>
+                    `).join('')}
+                </div>
+                <p id="cardFlipResult" class="text-sm text-slate-300"></p>
+                <button onclick="closeMiniGames()" class="mt-3 bg-slate-700 hover:bg-slate-600 text-white font-bold py-1 px-4 rounded-lg text-sm transition-all">Bezárás</button>
+            `;
+            window.cardFlipPick = (idx) => {
+                if (selected !== null) return;
+                selected = idx;
+                const card = shuffled[idx];
+                let msg = `Nyertél: ${card.icon} `;
+                if (card.type === 'points') {
+                    score += card.value;
+                    msg += `${card.value} pontot!`;
+                } else if (card.type === 'shield') {
+                    permanentShields += card.value;
+                    updatePermanentShieldDisplay();
+                    msg += `${card.value} védőpajzsot!`;
+                } else if (card.type === 'life') {
+                    persistentLives += card.value;
+                    msg += `${card.value} extra életet!`;
+                }
+                alert(msg);
+                playSound('lifeup');
+                updateUI();
+                closeMiniGames();
+            };
+        }
+
+        // ----- 5. Mellék Rendező -----
+        function startSorter(area) {
+            const items = shuffleArray([...directory]).slice(0, 5);
+            const sorted = [...items].sort((a,b) => parseInt(a.ext.replace(/,.*$/, '').trim()) - parseInt(b.ext.replace(/,.*$/, '').trim()));
+            area.innerHTML = `
+                <h4 class="text-xl font-black text-white mb-2">📊 Mellék Rendező</h4>
+                <p class="text-sm text-slate-300 mb-2">Rakd növekvő sorrendbe a mellékeket!</p>
+                <div id="sorterContainer" class="flex flex-wrap gap-2 justify-center mb-3"></div>
+                <button id="sorterCheck" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-xl shadow-lg transition-all">Ellenőrzés</button>
+                <button onclick="closeMiniGames()" class="ml-2 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-xl text-sm transition-all">Bezárás</button>
+                <p id="sorterFeedback" class="mt-3 text-sm"></p>
+            `;
+            const container = document.getElementById('sorterContainer');
+            let currentOrder = shuffleArray([...items]);
+            const renderSorter = () => {
+                container.innerHTML = currentOrder.map((item, idx) => `
+                    <div class="bg-slate-800 p-2 rounded-lg border border-slate-600 flex items-center gap-2">
+                        <span class="text-sm font-bold text-indigo-300">${item.ext}</span>
+                        <button onclick="sorterMove(${idx}, -1)" class="text-slate-400 hover:text-white">⬆</button>
+                        <button onclick="sorterMove(${idx}, 1)" class="text-slate-400 hover:text-white">⬇</button>
+                    </div>
+                `).join('');
+            };
+            window.sorterMove = (idx, dir) => {
+                const newIdx = idx + dir;
+                if (newIdx < 0 || newIdx >= currentOrder.length) return;
+                [currentOrder[idx], currentOrder[newIdx]] = [currentOrder[newIdx], currentOrder[idx]];
+                renderSorter();
+            };
+            window.sorterCheck = () => {
+                const correct = currentOrder.every((item, idx) => item === sorted[idx]);
+                if (correct) {
+                    score += 150;
+                    alert('Helyes sorrend! +150 pont!');
+                    playSound('correct');
+                } else {
+                    alert('Még nem jó! Próbáld újra!');
+                    playSound('wrong');
+                }
+                updateUI();
+                closeMiniGames();
+            };
+            renderSorter();
+        }
+
+        // ----- 6. Osztály-Kitaláló -----
+        function startDeptGuess(area) {
+            const item = directory[Math.floor(Math.random() * directory.length)];
+            const depts = [...new Set(directory.map(d => d.dept))];
+            const wrongDepts = shuffleArray(depts.filter(d => d !== item.dept)).slice(0, 3);
+            const options = shuffleArray([item.dept, ...wrongDepts]);
+            area.innerHTML = `
+                <h4 class="text-xl font-black text-white mb-2">🏢 Osztály-Kitaláló</h4>
+                <p class="text-sm text-slate-300 mb-2">Melyik osztályhoz tartozik ez a mellék? <b class="text-indigo-400">${item.ext}</b></p>
+                <div class="flex flex-wrap gap-2 justify-center mb-3">
+                    ${options.map(opt => `<button onclick="deptGuessCheck('${opt}')" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-xl shadow-lg transition-all">${opt}</button>`).join('')}
+                </div>
+                <button onclick="closeMiniGames()" class="mt-3 bg-slate-700 hover:bg-slate-600 text-white font-bold py-1 px-4 rounded-lg text-sm transition-all">Bezárás</button>
+            `;
+            window.deptGuessCheck = (chosen) => {
+                if (chosen === item.dept) {
+                    score += 100;
+                    alert('Helyes! +100 pont!');
+                    playSound('correct');
+                } else {
+                    alert(`Hibás! A helyes osztály: ${item.dept}`);
+                    playSound('wrong');
+                }
+                updateUI();
+                closeMiniGames();
+            };
+        }
+
+        // ----- 7. Mellék-Számológép -----
+        function startMath(area) {
+            const items = [];
+            for (let i=0; i<3; i++) {
+                items.push(directory[Math.floor(Math.random() * directory.length)]);
+            }
+            const numbers = items.map(it => parseInt(it.ext.replace(/,.*$/, '').trim()));
+            const sum = numbers.reduce((a,b) => a+b, 0);
+            area.innerHTML = `
+                <h4 class="text-xl font-black text-white mb-2">🧮 Mellék-Számológép</h4>
+                <p class="text-sm text-slate-300 mb-2">Add össze a következő mellékeket!</p>
+                <div class="text-lg font-bold text-indigo-300 mb-2">${numbers.join(' + ')}</div>
+                <input type="number" id="mathInput" class="bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2 w-32 text-center text-lg font-bold" placeholder="Eredmény">
+                <button onclick="mathCheck()" class="ml-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-xl shadow-lg transition-all">Ellenőrzés</button>
+                <button onclick="closeMiniGames()" class="ml-2 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-xl text-sm transition-all">Bezárás</button>
+                <p id="mathFeedback" class="mt-3 text-sm"></p>
+            `;
+            window.mathCheck = () => {
+                const input = document.getElementById('mathInput');
+                const val = parseInt(input.value);
+                if (isNaN(val)) { alert('Adj meg egy számot!'); return; }
+                if (val === sum) {
+                    score += 100;
+                    alert('Helyes! +100 pont!');
+                    playSound('correct');
+                } else {
+                    alert(`Hibás! A helyes összeg: ${sum}`);
+                    playSound('wrong');
+                }
+                updateUI();
+                closeMiniGames();
+            };
+        }
+
+        // ----- 8. Betűkirakó -----
+        function startScrambler(area) {
+            const item = directory[Math.floor(Math.random() * directory.length)];
+            const word = item.name.replace(/[^a-zA-ZáéíóöőúüűÁÉÍÓÖŐÚÜŰ]/g,'').toLowerCase();
+            if (word.length < 4) {
+                alert('Ehhez a játékhoz hosszabb név kell, próbáld újra!');
+                closeMiniGames();
+                return;
+            }
+            const scrambled = shuffleArray(word.split('')).join('');
+            area.innerHTML = `
+                <h4 class="text-xl font-black text-white mb-2">🔠 Betűkirakó</h4>
+                <p class="text-sm text-slate-300 mb-2">Rakd ki a helyes szót az összekevert betűkből!</p>
+                <div class="text-2xl font-bold text-amber-400 mb-2">${scrambled.toUpperCase()}</div>
+                <input type="text" id="scramblerInput" class="bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2 w-48 text-center text-lg font-bold" placeholder="Szó...">
+                <button onclick="scramblerCheck()" class="ml-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-xl shadow-lg transition-all">Ellenőrzés</button>
+                <button onclick="closeMiniGames()" class="ml-2 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-xl text-sm transition-all">Bezárás</button>
+                <p id="scramblerFeedback" class="mt-3 text-sm"></p>
+            `;
+            window.scramblerCheck = () => {
+                const input = document.getElementById('scramblerInput');
+                const val = input.value.trim().toLowerCase();
+                if (val === word) {
+                    score += 150;
+                    alert('Helyes! +150 pont!');
+                    playSound('correct');
+                } else {
+                    alert(`Hibás! A helyes szó: ${word}`);
+                    playSound('wrong');
+                }
+                updateUI();
+                closeMiniGames();
+            };
+        }
+
+        // ----- 9. Széfnyitó Kódfejtő -----
+        function startSafeCracker(area) {
+            const secret = String(Math.floor(100 + Math.random() * 900));
+            let attempts = 0;
+            area.innerHTML = `
+                <h4 class="text-xl font-black text-white mb-2">🔓 Széfnyitó Kódfejtő</h4>
+                <p class="text-sm text-slate-300 mb-2">Találd ki a 3-jegyű kódot!</p>
+                <input type="text" id="safeInput" class="bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2 w-32 text-center text-lg font-bold" placeholder="Kód" maxlength="3">
+                <button onclick="safeCheck()" class="ml-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-xl shadow-lg transition-all">Ellenőrzés</button>
+                <button onclick="closeMiniGames()" class="ml-2 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-xl text-sm transition-all">Bezárás</button>
+                <p id="safeFeedback" class="mt-3 text-sm text-slate-300"></p>
+            `;
+            window.safeCheck = () => {
+                const input = document.getElementById('safeInput');
+                const val = input.value.trim();
+                if (val.length !== 3 || isNaN(val)) { alert('Adj meg egy 3-jegyű számot!'); return; }
+                attempts++;
+                let hint = '';
+                for (let i=0; i<3; i++) {
+                    if (val[i] === secret[i]) hint += '🟢';
+                    else if (secret.includes(val[i])) hint += '🟡';
+                    else hint += '🔴';
+                }
+                if (val === secret) {
+                    score += 200;
+                    alert(`Gratulálok! A kód: ${secret}. +200 pont! (${attempts} próbálkozás)`);
+                    playSound('correct');
+                    updateUI();
+                    closeMiniGames();
+                } else {
+                    document.getElementById('safeFeedback').innerHTML = `Tipp: ${hint} (${attempts}. próba)`;
+                    playSound('wrong');
+                    if (attempts >= 5) {
+                        alert(`Sajnos elfogyott a próbálkozásaid száma! A kód: ${secret}`);
+                        closeMiniGames();
+                    }
+                }
+            };
+        }
+
+        // ----- 10. Mellék-Lottó -----
+        function startLotto(area) {
+            const numbers = [];
+            for (let i=0; i<2; i++) {
+                numbers.push(parseInt(directory[Math.floor(Math.random() * directory.length)].ext.replace(/,.*$/, '').trim()));
+            }
+            area.innerHTML = `
+                <h4 class="text-xl font-black text-white mb-2">🎟️ Mellék-Lottó</h4>
+                <p class="text-sm text-slate-300 mb-2">Válassz 2 számot, és nézd meg egyezik-e!</p>
+                <div class="flex gap-4 justify-center mb-2">
+                    <input type="number" id="lotto1" class="bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2 w-20 text-center text-lg font-bold" placeholder="1">
+                    <input type="number" id="lotto2" class="bg-slate-800 text-white border border-slate-600 rounded-xl px-4 py-2 w-20 text-center text-lg font-bold" placeholder="2">
+                </div>
+                <button onclick="lottoCheck()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-xl shadow-lg transition-all">Ellenőrzés</button>
+                <button onclick="closeMiniGames()" class="ml-2 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-xl text-sm transition-all">Bezárás</button>
+                <p id="lottoFeedback" class="mt-3 text-sm text-slate-300"></p>
+            `;
+            window.lottoCheck = () => {
+                const v1 = parseInt(document.getElementById('lotto1').value);
+                const v2 = parseInt(document.getElementById('lotto2').value);
+                if (isNaN(v1) || isNaN(v2)) { alert('Adj meg két számot!'); return; }
+                const matched = numbers.filter(n => n === v1 || n === v2).length;
+                if (matched === 2) {
+                    score += 200;
+                    alert(`Telitalálat! A számok: ${numbers.join(', ')}. +200 pont!`);
+                    playSound('correct');
+                } else if (matched === 1) {
+                    score += 50;
+                    alert(`Egy találat! A számok: ${numbers.join(', ')}. +50 pont!`);
+                    playSound('correct');
+                } else {
+                    alert(`Sajnos egyik sem egyezik! A számok: ${numbers.join(', ')}.`);
+                    playSound('wrong');
+                }
+                updateUI();
+                closeMiniGames();
+            };
         }
 
         // ======================================================================
         // ========== JÁTÉK LOGIKA ==========
         // ======================================================================
 
-        // ... (rest of game logic - nextQuestion, selectOption, etc.)
+        // A játék végén a szerencsekerék megjelenítése
+        function triggerWheelPrompt() {
+            const modal = getEl('luckyWheelPromptModal');
+            const scoreEl = getEl('wheelCurrentScore');
+            const betSlider = getEl('wheelBetSlider');
+            const betDisplay = getEl('wheelBetDisplay');
+            const maxBetLabel = getEl('wheelMaxBetLabel');
+            if (modal && scoreEl && betSlider && betDisplay) {
+                scoreEl.innerText = `${score} p`;
+                const maxBet = Math.min(100, score);
+                betSlider.max = maxBet;
+                betSlider.value = Math.min(50, maxBet);
+                betDisplay.innerText = `${betSlider.value} p`;
+                maxBetLabel.innerText = `Max: ${maxBet} p`;
+                modal.classList.remove('hidden');
+            }
+        }
 
-        // ========== FŐMENÜ ==========
-        async function backToMainMenu() {
+        // A szerencsekerék elindítása a tét levonásával
+        function startLuckyWheelGame() {
+            const slider = getEl('wheelBetSlider');
+            const bet = parseInt(slider.value);
+            if (bet > score) { alert("Nincs elég pontod!"); return; }
+            activeBetValue = bet;
+            score -= bet;
+            getEl('luckyWheelPromptModal').classList.add('hidden');
+            const modal = getEl('interactiveWheelModal');
+            modal.classList.remove('hidden');
+            document.getElementById('activeWheelBet').innerText = bet + ' p';
+            document.getElementById('wheelStatusMessage').innerText = 'Pörgetés...';
+            toggleWheelRotation();
+        }
+
+        // A kerék pörgetése és az eredmény feldolgozása
+        function toggleWheelRotation() {
+            if (isWheelSpinning) return;
+            isWheelSpinning = true;
+            const wheel = document.getElementById('luckyWheelCircle');
+            const btn = document.getElementById('wheelTriggerBtn');
+            btn.disabled = true;
+            btn.innerText = 'Pörög...';
+            const spinDuration = 4000 + Math.random() * 2000;
+            const startTime = performance.now();
+            const startRotation = currentWheelRotation;
+            const targetRotation = startRotation + 360 * (5 + Math.random() * 5) + Math.random() * 360;
+            function animateSpin(time) {
+                const elapsed = time - startTime;
+                const progress = Math.min(elapsed / spinDuration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const currentRotation = startRotation + (targetRotation - startRotation) * eased;
+                wheel.style.transform = `rotate(${currentRotation}deg)`;
+                if (progress < 1) {
+                    requestAnimationFrame(animateSpin);
+                } else {
+                    currentWheelRotation = targetRotation;
+                    isWheelSpinning = false;
+                    btn.disabled = false;
+                    btn.innerText = 'INDÍTÁS 🎡';
+                    document.getElementById('wheelStatusMessage').innerText = 'A kerék megállt!';
+                    // Eredmény kiszámítása
+                    const normalized = ((currentWheelRotation % 360) + 360) % 360;
+                    const segmentIndex = Math.floor(normalized / 45);
+                    const segment = segments[segmentIndex % segments.length];
+                    let resultMsg = '';
+                    if (typeof segment.mult === 'number') {
+                        const win = Math.round(activeBetValue * segment.mult);
+                        if (win > 0) {
+                            score += win;
+                            resultMsg = `🎉 Nyertél: ${win} pontot! (${segment.name})`;
+                        } else {
+                            resultMsg = `😢 Sajnos elvesztetted a tétet! (${segment.name})`;
+                        }
+                    } else if (segment.mult === 'shield') {
+                        permanentShields++;
+                        setLocalVal('pers_shields', permanentShields);
+                        updatePermanentShieldDisplay();
+                        resultMsg = `🛡️ Nyertél egy tartós védőpajzsot! (és a téted visszajár)`;
+                        score += activeBetValue;
+                    } else if (segment.mult === 'life') {
+                        persistentLives++;
+                        setLocalVal('pers_lives', persistentLives);
+                        resultMsg = `💖 Nyertél egy extra életet a következő játékra! (és a téted visszajár)`;
+                        score += activeBetValue;
+                    }
+                    document.getElementById('wheelStatusMessage').innerHTML = resultMsg;
+                    // Játék vége a kerék után
+                    setTimeout(() => {
+                        getEl('interactiveWheelModal').classList.add('hidden');
+                        finalizeGameAfterWheel();
+                    }, 2000);
+                }
+            }
+            requestAnimationFrame(animateSpin);
+        }
+
+        // Kihagyás a kerékből
+        function skipLuckyWheelGame() {
+            getEl('luckyWheelPromptModal').classList.add('hidden');
+            finalizeGameAfterWheel();
+        }
+
+        // A tét csúszka frissítése
+        function updateBetSliderDisplay(val) {
+            const display = getEl('wheelBetDisplay');
+            if (display) display.innerText = val + ' p';
+        }
+
+        function backToMainMenu() {
             if (timer) clearInterval(timer);
             if (duelListenerUnsubscribe) {
                 duelListenerUnsubscribe();
@@ -3598,8 +4156,8 @@
                 updateMissionProgress();
             }
             populateDuelDropdown();
-            await renderLeaderboard();
-            await renderLastLoginList();
+            renderLeaderboard();
+            renderLastLoginList();
             updateDailyBanner();
             updateAdDisplay();
             loadUnlimitedPasses();
@@ -3858,7 +4416,7 @@
                     const dateStr = formatLastLogin(user.lastLoginDate);
                     const rankInfo = getRankInfo(user.cumulativeScore || 0);
                     html += `
-                        <div class="user-list-item flex justify-between items-center py-2 px-3 border-b border-slate-700/50 last:border-0 text-sm" onclick="fillUsernameAndOpenProfile('${user.username}')">
+                        <div class="user-list-item flex justify-between items-center py-2 px-3 border-b border-slate-700/50 last:border-0 text-sm" onclick="fillUsernameOnly('${user.username}')">
                             <div class="flex items-center gap-2">
                                 ${online ? '<span class="online-dot"></span>' : '<span class="offline-dot"></span>'}
                                 <span class="font-semibold text-slate-200">${user.username}</span>
@@ -3903,12 +4461,8 @@
             const livesContainer = getEl('livesContainer');
             if (livesContainer) {
                 livesContainer.innerHTML = '';
-                for (let i = 1; i <= maxLives; i++) {
-                    if (i <= lives) {
-                        livesContainer.innerHTML += '<i class="fa-solid fa-heart heart-full transition-all drop-shadow-[0_0_5px_rgba(244,63,94,0.5)]"></i>';
-                    } else {
-                        livesContainer.innerHTML += '<i class="fa-solid fa-heart heart-empty transition-all"></i>';
-                    }
+                for (let i = 0; i < lives; i++) {
+                    livesContainer.innerHTML += '<i class="fa-solid fa-heart heart-full transition-all drop-shadow-[0_0_5px_rgba(244,63,94,0.5)]"></i>';
                 }
             }
             const shieldInd = getEl('shieldIndicator');
@@ -4284,7 +4838,7 @@
             buttons.forEach(btn => btn.disabled = true);
         }
 
-        // ========== VÁLASZTÁS KEZELÉS (IDŐZÍTETT GYORSASÁGI BÓNUSZ) ==========
+        // ========== VÁLASZTÁS KEZELÉS ==========
         function selectOption(clickedBtn, option) {
             if (timer) clearInterval(timer);
             disableOptionButtons();
@@ -4326,12 +4880,10 @@
                 }
                 let extraLifeMsg = "";
                 if (streak % 5 === 0) {
-                    if (lives < maxLives) {
-                        lives++;
-                        playSound('lifeup');
-                        unlockBadge("immortal");
-                        extraLifeMsg = '<br><span class="text-emerald-400 font-black inline-block mt-2 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20"><i class="fa-solid fa-heart animate-pulse"></i> Extra élet a jó szériáért!</span>';
-                    }
+                    lives++;
+                    playSound('lifeup');
+                    unlockBadge("immortal");
+                    extraLifeMsg = '<br><span class="text-emerald-400 font-black inline-block mt-2 bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20"><i class="fa-solid fa-heart animate-pulse"></i> Extra élet a jó szériáért!</span>';
                 }
                 const basePoints = 100;
                 let finalPoints = Math.round(basePoints * getMultiplier() * riskMultiplier * wagerMultiplier * untimedScale);
